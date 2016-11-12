@@ -22,7 +22,7 @@ public class Bootstrap implements CommandLineRunner {
         logger.info("Bootstrap starts");
         def roles = [
                 [authority: SecurityService.ROLE_ADMIN, description: "Administrator"],
-                [authority: SecurityService.ROLE_ACCESS, description: "Application access"]
+                [authority: SecurityService.ROLE_USER, description: "Application user"]
         ]
         roles.each{ Map roleInfo ->
             SecRole role = securityService.findSecRoleByAuthority(roleInfo.authority)
@@ -44,7 +44,7 @@ public class Bootstrap implements CommandLineRunner {
         }
 
         securityService.grantRole(adminUser, securityService.findSecRoleByAuthority(SecurityService.ROLE_ADMIN));
-        securityService.grantRole(adminUser, securityService.findSecRoleByAuthority(SecurityService.ROLE_ACCESS));
+        securityService.grantRole(adminUser, securityService.findSecRoleByAuthority(SecurityService.ROLE_USER));
 
         logger.info("Bootstrap ends");
     }

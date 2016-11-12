@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-public class HybridSecuritySampleApplication {
+public class SpringSecurityVaadinApplication {
 
 
     @Configuration
@@ -57,6 +57,6 @@ public class HybridSecuritySampleApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(HybridSecuritySampleApplication.class, args);
+        SpringApplication.run(SpringSecurityVaadinApplication.class, args);
     }
 }

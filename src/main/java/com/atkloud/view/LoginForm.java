@@ -1,4 +1,4 @@
-package com.atkloud;
+package com.atkloud.view;
 
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.*;
@@ -8,12 +8,19 @@ public class LoginForm extends VerticalLayout {
     public LoginForm(LoginCallback callback) {
         setMargin(true);
         setSpacing(true);
+        setSizeFull();
+
+        VerticalLayout centerLayout = new VerticalLayout();
+        centerLayout.setSizeUndefined();
+        centerLayout.setMargin(true);
+        centerLayout.setSpacing(true);
+
 
         TextField username = new TextField("Username");
-        addComponent(username);
+        centerLayout.addComponent(username);
 
         PasswordField password = new PasswordField("Password");
-        addComponent(password);
+        centerLayout.addComponent(password);
 
         Button login = new Button("Login", evt -> {
             String pword = password.getValue();
@@ -24,12 +31,13 @@ public class LoginForm extends VerticalLayout {
             }
         });
         login.setClickShortcut(ShortcutAction.KeyCode.ENTER);
-        addComponent(login);
+        centerLayout.addComponent(login);
+        addComponent(centerLayout);
+        setComponentAlignment(centerLayout, Alignment.MIDDLE_CENTER);
     }
 
     @FunctionalInterface
     public interface LoginCallback {
-
         boolean login(String username, String password);
     }
 }

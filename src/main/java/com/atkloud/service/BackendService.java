@@ -1,4 +1,4 @@
-package com.atkloud;
+package com.atkloud.service;
 
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;

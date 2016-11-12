@@ -5,6 +5,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.atkloud.service.BackendService;
+import com.atkloud.service.SecurityService;
+import com.atkloud.view.*;
+import com.vaadin.server.FontAwesome;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,19 +32,17 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringUI
 // No @Push annotation, we are going to enable it programmatically when the user logs on
 @Theme(ValoTheme.THEME_NAME) // Looks nicer
-public class SecuredUI extends UI {
+public class MainUI extends UI {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    @Autowired AuthenticationManager authenticationManager;
 
-    @Autowired
-    BackendService backendService;
+    @Autowired BackendService backendService;
 
-    @Autowired
-    SpringViewProvider viewProvider;
+    @Autowired SpringViewProvider viewProvider;
 
-    @Autowired
-    ErrorView errorView;
+    @Autowired ErrorView errorView;
+
+    @Autowired SecurityService securityService;
 
     private Label timeAndUser;
 
@@ -57,7 +59,7 @@ public class SecuredUI extends UI {
     }
 
     private void showLogin() {
-        setContent(new LoginForm(this::login));
+        setContent(new com.atkloud.view.LoginForm(this::login));
     }
 
     private void showMain() {
@@ -65,6 +67,16 @@ public class SecuredUI extends UI {
         layout.setMargin(true);
         layout.setSpacing(true);
         layout.setSizeFull();
+
+        MenuBar menuBar = new MenuBar();
+        menuBar.setWidth(100.0f, Unit.PERCENTAGE);
+        MenuBar.MenuItem adminItem = menuBar.addItem("Admin", FontAwesome.COG, null);
+        adminItem.addItem("Roles", FontAwesome.GROUP, event -> { getNavigator().navigateTo("roles"); } );
+        adminItem.addItem("Users", FontAwesome.USERS, event -> { getNavigator().navigateTo("users"); } );
+        MenuBar.MenuItem userItem = menuBar.addItem("User option", FontAwesome.USER, event -> { getNavigator().navigateTo(""); });
+        userItem.addSeparator();
+        layout.addComponent(menuBar);
+
 
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.setSpacing(true);
@@ -114,7 +126,9 @@ public class SecuredUI extends UI {
 
     @Override
     public void detach() {
-        timer.cancel();
+        if(timer!=null){
+            timer.cancel();
+        }
         super.detach();
     }
 
@@ -123,7 +137,7 @@ public class SecuredUI extends UI {
         // access(...) method.
         access(() -> timeAndUser.setValue(String.format("The server-side time is %s and the current user is %s",
             LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")),
-            SecurityContextHolder.getContext().getAuthentication().getName())));
+            securityService.getPrincipal().getUsername())));
     }
 
     private boolean login(String username, String password) {

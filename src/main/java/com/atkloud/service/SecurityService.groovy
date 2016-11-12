@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class SecurityService {
 	static final String ROLE_ADMIN = "ROLE_ADMIN"
-	static final String ROLE_ACCESS = "ROLE_ACCESS"
+	static final String ROLE_USER = "ROLE_USER"
 
 	@Autowired PasswordEncoder bcryptEncoder
 	@Autowired SecUserRepository secUserRepository
@@ -118,6 +118,10 @@ class SecurityService {
 		return(hasRole(secUser, findSecRoleByAuthority(authority)))
 	}
 
+	Boolean hasRole(String authority){
+		return(hasRole(getPrincipal(), authority))
+	}
+
 	SecUser createSecUser(parameters){
 		SecUser existingUser = findSecUserByUsername(parameters.username)
 		if(existingUser){
@@ -138,7 +142,7 @@ class SecurityService {
 		newUser.setPassword(newPassword)
 		newUser = secUserRepository.save(newUser)
 		grantAndRevokeRoles(newUser, parameters.rolesToGrant, parameters.rolesToRevoke)
-		grantRole(newUser, findSecRoleByAuthority(ROLE_ACCESS))
+		grantRole(newUser, findSecRoleByAuthority(ROLE_USER))
 		return(newUser)
 	}
 
@@ -163,7 +167,7 @@ class SecurityService {
 	}
 
 	def enableOrDisableSecRole(SecUser secUser, Boolean enabled){
-		SecRole accessRole = findSecRoleByAuthority(ROLE_ACCESS)
+		SecRole accessRole = findSecRoleByAuthority(ROLE_USER)
 		if(secUser){
 			if(!enabled){
 				revokeRole(secUser, accessRole)

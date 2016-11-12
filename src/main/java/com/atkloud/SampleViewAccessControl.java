@@ -1,5 +1,7 @@
 package com.atkloud;
 
+import com.atkloud.service.SecurityService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.spring.access.ViewAccessControl;
@@ -11,12 +13,17 @@ import com.vaadin.ui.UI;
 @Component
 public class SampleViewAccessControl implements ViewAccessControl {
 
+    @Autowired
+    SecurityService securityService;
+
     @Override
     public boolean isAccessGranted(UI ui, String beanName) {
         if (beanName.equals("adminView")) {
-            return SecurityUtils.hasRole("ROLE_ADMIN");
+//            System.out.println("Checking admin role");
+            return securityService.hasRole("ROLE_ADMIN");
         } else {
-            return SecurityUtils.hasRole("ROLE_USER");
+//            System.out.println("Checking user role");
+            return securityService.hasRole("ROLE_USER");
         }
     }
 }

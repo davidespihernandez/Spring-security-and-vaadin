@@ -1,4 +1,4 @@
-package com.atkloud;
+package com.atkloud.view;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -7,11 +7,11 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
 @SpringView
-public class AdminView extends VerticalLayout implements View {
+public class RolesView extends VerticalLayout implements View {
 
-    public AdminView() {
+    public RolesView() {
         setMargin(true);
-        addComponent(new Label("Admin view"));
+        addComponent(new Label("Roles view"));
     }
 
     @Override
