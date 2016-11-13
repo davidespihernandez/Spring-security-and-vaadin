@@ -74,33 +74,8 @@ public class MainUI extends UI {
         adminItem.addItem("Roles", FontAwesome.GROUP, event -> { getNavigator().navigateTo("roles"); } );
         adminItem.addItem("Users", FontAwesome.USERS, event -> { getNavigator().navigateTo("users"); } );
         MenuBar.MenuItem userItem = menuBar.addItem("User option", FontAwesome.USER, event -> { getNavigator().navigateTo(""); });
-        userItem.addSeparator();
+        menuBar.addItem("Logout", FontAwesome.SIGN_OUT, event -> { logout(); } );
         layout.addComponent(menuBar);
-
-
-        HorizontalLayout buttons = new HorizontalLayout();
-        buttons.setSpacing(true);
-        layout.addComponent(buttons);
-
-        buttons.addComponent(new Button("Invoke user method", event -> {
-            // This method should be accessible by both 'user' and 'admin'.
-            Notification.show(backendService.userMethod());
-        }));
-        buttons.addComponent(new Button("Navigate to user view", event -> {
-            getNavigator().navigateTo("");
-        }));
-        buttons.addComponent(new Button("Invoke admin method", event -> {
-            // This method should be accessible by 'admin' only.
-            Notification.show(backendService.adminMethod());
-        }));
-        buttons.addComponent(new Button("Navigate to admin view", event -> {
-            getNavigator().navigateTo("admin");
-        }));
-        buttons.addComponent(new Button("Logout", event -> logout()));
-        timeAndUser = new Label();
-        timeAndUser.setSizeUndefined();
-        buttons.addComponent(timeAndUser);
-        buttons.setComponentAlignment(timeAndUser, Alignment.MIDDLE_LEFT);
 
         Panel viewContainer = new Panel();
         viewContainer.setSizeFull();
@@ -114,30 +89,11 @@ public class MainUI extends UI {
         navigator.addProvider(viewProvider);
         navigator.setErrorView(errorView);
         viewProvider.setAccessDeniedViewClass(AccessDeniedView.class);
-        // Fire up a timer to demonstrate server push. Do NOT use timers in real-world applications, use a thread pool.
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                updateTimeAndUser();
-            }
-        }, 1000L, 1000L);
     }
 
     @Override
     public void detach() {
-        if(timer!=null){
-            timer.cancel();
-        }
         super.detach();
-    }
-
-    private void updateTimeAndUser() {
-        // Demonstrate that server push works and that you can even access the security context from within the
-        // access(...) method.
-        access(() -> timeAndUser.setValue(String.format("The server-side time is %s and the current user is %s",
-            LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")),
-            securityService.getPrincipal().getUsername())));
     }
 
     private boolean login(String username, String password) {

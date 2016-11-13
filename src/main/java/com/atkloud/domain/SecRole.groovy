@@ -72,7 +72,7 @@ class SecRole implements GrantedAuthority, Authentication, Serializable{
 	}
 	
 	String toString(){
-		return(authority)
+		return("SecRole: " + authority)
 	}
 
 }

@@ -30,7 +30,7 @@ class SecurityService {
 	}
 
 	SecUser findSecUserById(Long id){
-		SecUser secUser = SecUser.get(id)
+		SecUser secUser = secUserRepository.findOneById(id)
 		return secUser
 	}
 
@@ -42,6 +42,10 @@ class SecurityService {
 
 	SecRole findSecRoleByAuthority(String authority){
 		return(secRoleRepository.findOneByAuthority(authority))
+	}
+
+	SecRole findSecRoleById(Long id){
+		return(secRoleRepository.findOneById(id))
 	}
 
 	SecRole createRole(String authority, String description){
@@ -64,15 +68,15 @@ class SecurityService {
 
 	List<SecRole> findAllSecRoleBySecUser(SecUser secUser){
 		List<SecUserSecRole> secUserSecRoles = secUserSecRoleRepository.findByIdSecUser(secUser)
-		return(secUserSecRoles.secRole.findAll{ it.authority!=ROLE_ACCESS }.sort{ SecRole a, SecRole b -> a.getDescription() <=> b.getDescription() })
+		return(secUserSecRoles.secRole.findAll{ it.authority!=ROLE_USER}.sort{ SecRole a, SecRole b -> a.getDescription() <=> b.getDescription() })
 	}
 
 	List<SecRole> findAllSecRoles(){
-		return(SecRole.findAll().sort{ SecRole a, SecRole b -> a.getDescription() <=> b.getDescription() })
+		return(secRoleRepository.findAll().sort{ SecRole a, SecRole b -> a.getDescription() <=> b.getDescription() })
 	}
 
 	List<SecUser> findAllSecUsers(String filter=null){
-		List<SecUser> allUsers = SecUser.findAll().sort { SecUser a, SecUser b -> a.getFullName()<=>b.getFullName() }
+		List<SecUser> allUsers = secUserRepository.findAll().sort { SecUser a, SecUser b -> a.getFullName()<=>b.getFullName() }
 		if(filter && filter.trim()!=""){
 			allUsers = allUsers.findAll{ it.getFullName().toUpperCase().contains(filter.toUpperCase()) }
 		}
@@ -187,6 +191,16 @@ class SecurityService {
 		rolesToRevoke.each{ SecRole secRole ->
 			revokeRole(secUser, secRole)
 		}
+	}
+
+	SecRole updateSecRole(Long secRoleId, String authority, String description){
+		SecRole secRole = findSecRoleById(secRoleId)
+		if(secRole){
+			secRole.setAuthority(authority)
+			secRole.setDescription(description)
+			secRoleRepository.save(secRole)
+		}
+		return(secRole)
 	}
 
 }
