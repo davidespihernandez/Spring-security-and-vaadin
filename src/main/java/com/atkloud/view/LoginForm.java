@@ -1,7 +1,9 @@
 package com.atkloud.view;
 
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class LoginForm extends VerticalLayout {
 
@@ -31,6 +33,8 @@ public class LoginForm extends VerticalLayout {
             }
         });
         login.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+        login.setIcon(FontAwesome.SIGN_IN);
+        login.addStyleName(ValoTheme.BUTTON_PRIMARY);
         centerLayout.addComponent(login);
         addComponent(centerLayout);
         setComponentAlignment(centerLayout, Alignment.MIDDLE_CENTER);

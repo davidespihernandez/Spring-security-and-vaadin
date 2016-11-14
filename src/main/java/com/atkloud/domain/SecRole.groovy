@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 
 import javax.persistence.*
+import javax.validation.constraints.Size
 
 @Entity
 @Table(name = "sec_role")
@@ -17,9 +18,11 @@ class SecRole implements GrantedAuthority, Authentication, Serializable{
 	private Long version = 0L;
 
 	@Column(name = "authority", nullable = false, unique = true)
-	String authority 
+	@Size(min=1, max=255)
+	String authority
 
-	@Column(name = "description", nullable = true)
+	@Column(name = "description", nullable = false)
+	@Size(min=1, max=255)
 	String description
 
 	@Column(name = "authenticated", nullable = false)

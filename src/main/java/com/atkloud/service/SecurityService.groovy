@@ -203,4 +203,12 @@ class SecurityService {
 		return(secRole)
 	}
 
+	SecRole updateSecRole(SecRole secRole){
+		secRoleRepository.save(secRole)
+	}
+
+	def deleteSecRole(SecRole secRole){
+		secRoleRepository.delete(secRole.getId())
+	}
+
 }

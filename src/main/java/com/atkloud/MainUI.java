@@ -71,10 +71,10 @@ public class MainUI extends UI {
         MenuBar menuBar = new MenuBar();
         menuBar.setWidth(100.0f, Unit.PERCENTAGE);
         MenuBar.MenuItem adminItem = menuBar.addItem("Admin", FontAwesome.COG, null);
-        adminItem.addItem("Roles", FontAwesome.GROUP, event -> { getNavigator().navigateTo("roles"); } );
-        adminItem.addItem("Users", FontAwesome.USERS, event -> { getNavigator().navigateTo("users"); } );
-        MenuBar.MenuItem userItem = menuBar.addItem("User option", FontAwesome.USER, event -> { getNavigator().navigateTo(""); });
-        menuBar.addItem("Logout", FontAwesome.SIGN_OUT, event -> { logout(); } );
+        adminItem.addItem("Roles", FontAwesome.GROUP, event -> getNavigator().navigateTo("roles") );
+        adminItem.addItem("Users", FontAwesome.USER, event -> getNavigator().navigateTo("users") );
+        MenuBar.MenuItem userItem = menuBar.addItem("User option", FontAwesome.USER, event -> getNavigator().navigateTo(""));
+        menuBar.addItem("Logout", FontAwesome.SIGN_OUT, event -> logout() );
         layout.addComponent(menuBar);
 
         Panel viewContainer = new Panel();
