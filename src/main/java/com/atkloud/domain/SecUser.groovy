@@ -56,6 +56,14 @@ class SecUser implements Authentication, Serializable{
 		return([] as Collection)
 	}
 
+	public SecUser(){
+		username = ""
+		firstName = ""
+		lastName = ""
+		userEmail = ""
+		phoneNumber = ""
+	}
+
 	//methods from Authentication interface, needed for Acl security
 	@Override
 	public String getName() {

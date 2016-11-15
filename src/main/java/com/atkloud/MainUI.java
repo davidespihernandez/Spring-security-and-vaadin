@@ -73,7 +73,7 @@ public class MainUI extends UI {
         MenuBar.MenuItem adminItem = menuBar.addItem("Admin", FontAwesome.COG, null);
         adminItem.addItem("Roles", FontAwesome.GROUP, event -> getNavigator().navigateTo("roles") );
         adminItem.addItem("Users", FontAwesome.USER, event -> getNavigator().navigateTo("users") );
-        MenuBar.MenuItem userItem = menuBar.addItem("User option", FontAwesome.USER, event -> getNavigator().navigateTo(""));
+        MenuBar.MenuItem otherItem = menuBar.addItem("Other option", FontAwesome.STICKY_NOTE, event -> getNavigator().navigateTo("other"));
         menuBar.addItem("Logout", FontAwesome.SIGN_OUT, event -> logout() );
         layout.addComponent(menuBar);
 

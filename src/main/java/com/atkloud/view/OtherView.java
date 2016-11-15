@@ -6,12 +6,12 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
-@SpringView(name = "") // Root view
-public class UserView extends VerticalLayout implements View {
+@SpringView(name = "other") // Root view
+public class OtherView extends VerticalLayout implements View {
 
-    public UserView() {
+    public OtherView() {
         setMargin(true);
-        addComponent(new Label("User view"));
+        addComponent(new Label("Create your content here..."));
     }
 
     @Override

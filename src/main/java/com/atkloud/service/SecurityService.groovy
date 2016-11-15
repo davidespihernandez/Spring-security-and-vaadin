@@ -68,7 +68,7 @@ class SecurityService {
 
 	List<SecRole> findAllSecRoleBySecUser(SecUser secUser){
 		List<SecUserSecRole> secUserSecRoles = secUserSecRoleRepository.findByIdSecUser(secUser)
-		return(secUserSecRoles.secRole.findAll{ it.authority!=ROLE_USER}.sort{ SecRole a, SecRole b -> a.getDescription() <=> b.getDescription() })
+		return(secUserSecRoles.secRole.sort{ SecRole a, SecRole b -> a.getDescription() <=> b.getDescription() })
 	}
 
 	List<SecRole> findAllSecRoles(){
@@ -100,7 +100,7 @@ class SecurityService {
 	Boolean revokeRole(SecUser secUser, SecRole secRole){
 		SecUserSecRole secUserSecRole = secUserSecRoleRepository.findOneByIdSecUserAndIdSecRole(secUser, secRole)
 		if(secUserSecRole){
-			secUserSecRoleRepository.delete(secUserSecRole)
+			secUserSecRoleRepository.deleteByIdSecUserAndIdSecRole(secUser, secRole)
 			return(true)
 		}
 		return(false)
@@ -148,6 +148,15 @@ class SecurityService {
 		grantAndRevokeRoles(newUser, parameters.rolesToGrant, parameters.rolesToRevoke)
 		grantRole(newUser, findSecRoleByAuthority(ROLE_USER))
 		return(newUser)
+	}
+
+	SecUser createSecUser(SecUser secUser){
+		SecUser existingUser = findSecUserByUsername(secUser.getUsername())
+		if(existingUser){
+			return(existingUser)
+		}
+		secUser.setPassword(bcryptEncoder.encode(secUser.getUsername()))
+		return(secUserRepository.save(secUser))
 	}
 
 	def changePassword(SecUser secUser, String password){
@@ -198,7 +207,11 @@ class SecurityService {
 	}
 
 	def deleteSecUser(SecUser secUser){
-		secRoleRepository.delete(secUser.getId())
+		List<SecRole> userRoles = findAllSecRoleBySecUser(secUser)
+		userRoles.each{ secRole ->
+			secUserSecRoleRepository.deleteByIdSecUserAndIdSecRole(secUser, secRole)
+		}
+		secUserRepository.delete(secUser.getId())
 	}
 
 	SecUser updateSecUser(SecUser secUser, List<SecRole> rolesToGrant = null){

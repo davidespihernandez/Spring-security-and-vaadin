@@ -1,12 +1,18 @@
 package com.atkloud.view;
 
+import com.atkloud.domain.SecRole;
 import com.atkloud.domain.SecUser;
 import com.atkloud.domain.SecUser;
 import com.atkloud.service.SecurityService;
+import com.vaadin.data.Container;
+import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.PropertyId;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.ItemSorter;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -14,6 +20,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,8 +52,9 @@ public class UsersView extends VerticalLayout implements View {
 
     private BeanFieldGroup<SecUser> binder = new BeanFieldGroup<>(SecUser.class);
     private HorizontalLayout formLayout;
-    private Combobox roleCombobox;
+    private ComboBox roleCombobox;
     private Grid grantedRolesGrid;
+    private BeanItemContainer<SecRole> secRoleContainer;
 
     @Autowired
     public UsersView(SecurityService securityService) {
@@ -92,7 +100,7 @@ public class UsersView extends VerticalLayout implements View {
         HorizontalLayout northLayout = new HorizontalLayout();
         northLayout.addComponent(captionLabel);
         northLayout.setWidth("100%");
-        Button newUser = new Button("New user", clickEvent -> UI.getCurrent().getNavigator().navigateTo("userForm") );
+        Button newUser = new Button("New user", clickEvent -> UI.getCurrent().getNavigator().navigateTo("secUserForm") );
         newUser.setIcon(FontAwesome.PLUS);
         newUser.addStyleName(ValoTheme.BUTTON_PRIMARY);
         northLayout.addComponent(newUser);
@@ -111,11 +119,11 @@ public class UsersView extends VerticalLayout implements View {
         addComponent(verticalLayout);
 
         refresh();
-
     }
 
     private void configureFormLayout() {
         //form
+        secRoleContainer = new BeanItemContainer<>(SecRole.class);
         formLayout = new HorizontalLayout();
         formLayout.setSpacing(true);
         formLayout.setVisible(false);
@@ -123,7 +131,7 @@ public class UsersView extends VerticalLayout implements View {
 
         HorizontalLayout nameLayout = new HorizontalLayout();
         usernameTextField = new TextField("User");
-        nameLayout.addComponent(usernameTextField);
+        fieldsLayout.addComponent(usernameTextField);
 
         firstNameTextField = new TextField("First name");
         nameLayout.addComponent(firstNameTextField);
@@ -138,10 +146,9 @@ public class UsersView extends VerticalLayout implements View {
 
         phoneNumberTextField = new TextField("Phone number");
         mailAndPhoneLayout.addComponent(phoneNumberTextField);
+        mailAndPhoneLayout.setExpandRatio(userEmailTextField, 1.0f);
 
         fieldsLayout.addComponent(mailAndPhoneLayout);
-
-
 
         HorizontalLayout buttonsLayout = new HorizontalLayout();
         Button save = new Button("Save", event -> save(event));
@@ -159,30 +166,67 @@ public class UsersView extends VerticalLayout implements View {
 
         //roles grid
         VerticalLayout rolesLayout = new VerticalLayout();
+        HorizontalLayout addRoleLayout = new HorizontalLayout();
+        addRoleLayout.setWidth("100%");
+        addRoleLayout.setSpacing(true);
 
         roleCombobox = new ComboBox("Roles", new BeanItemContainer<>(SecRole.class, securityService.findAllSecRoles()));
         roleCombobox.setItemCaptionPropertyId("description");
         roleCombobox.setNullSelectionAllowed(true);
-        rolesLayout.addComponent(roleCombobox)
+        addRoleLayout.addComponent(roleCombobox);
 
-		grantedRolesGrid = new Grid();
-		grantedRolesGrid.setSizeFull();
+        Button addRoleButton = new Button("Grant role", this::grantRole);
+        addRoleButton.setIcon(FontAwesome.PLUS);
+        addRoleLayout.addComponent(addRoleButton);
+        addRoleLayout.setComponentAlignment(addRoleButton, Alignment.BOTTOM_LEFT);
+
+        Button revokeSelectedButton = new Button("Revoke selected", this::revokeRoles);
+        revokeSelectedButton.setIcon(FontAwesome.TIMES);
+        revokeSelectedButton.addStyleName(ValoTheme.BUTTON_DANGER);
+        addRoleLayout.addComponent(revokeSelectedButton);
+        addRoleLayout.setComponentAlignment(revokeSelectedButton, Alignment.BOTTOM_LEFT);
+
+        rolesLayout.addComponent(addRoleLayout);
+
+        rolesLayout.addComponent(addRoleLayout);
+
+		grantedRolesGrid = new Grid(secRoleContainer);
+        grantedRolesGrid.setCaption("Roles granted");
+        grantedRolesGrid.setSizeFull();
         grantedRolesGrid.setResponsive(true);
         grantedRolesGrid.setColumns("description");
-        grantedRolesGrid.setEditorEnabled(true);
-        grantedRolesGrid.setSelectionMode(Grid.SelectionMode.MULTIPLE);
-
+        grantedRolesGrid.setSelectionMode(Grid.SelectionMode.MULTI);
 
 		rolesLayout.addComponent(grantedRolesGrid);
         rolesLayout.setExpandRatio(grantedRolesGrid, 1.0f);
 
         formLayout.addComponent(rolesLayout);
 
-        formLayout.setComponentAlignment(save, Alignment.BOTTOM_LEFT);
-        formLayout.setComponentAlignment(deleteRole, Alignment.BOTTOM_RIGHT);
-
+        fieldsLayout.setSpacing(true);
+        formLayout.setSpacing(true);
+        nameLayout.setSpacing(true);
+        mailAndPhoneLayout.setSpacing(true);
+        buttonsLayout.setSpacing(true);
+        rolesLayout.setSpacing(true);
         binder.bindMemberFields(this);
+        refreshGrantedRoles();
+    }
 
+    private void grantRole(Button.ClickEvent event) {
+        SecUser secUser = binder.getItemDataSource().getBean();
+        SecRole role = (SecRole)roleCombobox.getValue();
+        if(role!=null){
+            securityService.grantRole(secUser, role);
+            refreshGrantedRoles();
+        }
+    }
+
+    private void revokeRoles(Button.ClickEvent event) {
+        SecUser secUser = binder.getItemDataSource().getBean();
+        if(secUser!=null){
+            grantedRolesGrid.getSelectedRows().forEach( role -> securityService.revokeRole(secUser, (SecRole)role));
+            refreshGrantedRoles();
+        }
     }
 
     private void select(SelectionEvent event) {
@@ -191,6 +235,7 @@ public class UsersView extends VerticalLayout implements View {
         } else {
             formLayout.setVisible(true);
             binder.setItemDataSource((SecUser) event.getSelected().iterator().next());
+            refreshGrantedRoles();
         }
     }
 
@@ -211,7 +256,7 @@ public class UsersView extends VerticalLayout implements View {
         try {
             SecUser secUser = binder.getItemDataSource().getBean();
             securityService.deleteSecUser(secUser);
-            Notification.show("Role deleted!");
+            Notification.show("User deleted!");
             refresh();
         } catch (Exception ex) {
             Notification.show("Unexpected error: " + ex.getMessage(), Notification.Type.ERROR_MESSAGE);
@@ -228,4 +273,13 @@ public class UsersView extends VerticalLayout implements View {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         //NOP
     }
+
+    private void refreshGrantedRoles() {
+        secRoleContainer.removeAllItems();
+        SecUser secUser = (SecUser)grid.getSelectedRow();
+        if(secUser!=null){
+            secRoleContainer.addAll(securityService.findAllSecRoleBySecUser(secUser));
+        }
+    }
+
 }
