@@ -150,20 +150,6 @@ class SecurityService {
 		return(newUser)
 	}
 
-	SecUser updateSecUser(parameters){
-		SecUser secUser = findSecUserById(parameters.id)
-		if(!secUser){
-			return(null)
-		}
-		secUser.setUserEmail(parameters.userEmail)
-		secUser.setFirstName(parameters.firstName)
-		secUser.setLastName(parameters.lastName)
-		secUser.setPhoneNumber(parameters.phoneNumber)
-		secUser = secUserRepository.save(secUser)
-		grantAndRevokeRoles(secUser, parameters.rolesToGrant, parameters.rolesToRevoke)		
-		return(secUser)
-	}
-
 	def changePassword(SecUser secUser, String password){
 		String newPassword = bcryptEncoder.encode(password)
 		secUser.setPassword(newPassword)
@@ -209,6 +195,24 @@ class SecurityService {
 
 	def deleteSecRole(SecRole secRole){
 		secRoleRepository.delete(secRole.getId())
+	}
+
+	def deleteSecUser(SecUser secUser){
+		secRoleRepository.delete(secUser.getId())
+	}
+
+	SecUser updateSecUser(SecUser secUser, List<SecRole> rolesToGrant = null){
+		SecUser user = secUserRepository.save(secUser)
+		if(rolesToGrant != null){
+			List<SecRole> currentRoles = findAllSecRoleBySecUser(secUser)
+			currentRoles.each{ SecRole secRole ->
+				revokeRole(secUser, secRole)
+			}
+			rolesToGrant.each{ SecRole secRole ->
+				grantRole(secUser, secRole)
+			}
+		}
+		return(user)
 	}
 
 }
